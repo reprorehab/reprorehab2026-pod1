@@ -1,87 +1,62 @@
-# 🧬 ReproRehab 2026 • Pod 1
+# ReproRehab 2026 – Pod 1
 
-> **Learning reproducible research together.**
-
-Welcome to the official repository for **ReproRehab 2026 Pod 1**!
-
-This repository serves as our shared workspace throughout the year. As we progress through the curriculum, it will grow into a collection of reproducible examples, code, workshop materials, and resources that participants can revisit long after the pod concludes.
+*A shared space for learning reproducible research.*
 
 ---
 
-## 🌱 What You'll Find Here
+## Welcome!
 
-📊 **Code**
-- R scripts
-- Data analysis examples
-- Visualization examples
+Welcome to the ReproRehab 2026 Pod 1 repository.
 
-📖 **Learning Materials**
-- Quarto documents
-- Workshop exercises
-- Reference guides
+We're glad you're here! This repository will serve as our shared workspace throughout the year, with materials added as we progress through the pod.
 
-🔬 **Reproducible Workflows**
-- Example projects
-- Best practices
-- Templates and reusable code
+Think of this repository as a living notebook—a place where you'll find examples, practice activities, and resources that support your learning.
 
 ---
 
-## 🚀 Getting Started
+## What You'll Find Here
 
-If you're new to GitHub:
+| Resource | Purpose |
+|-----------|---------|
+| **Code** | Example R scripts and reproducible workflows demonstrated during pod meetings. |
+| **Activities** | Practice exercises and workshop materials. |
+| **Quarto Documents** | Reproducible reports and examples created during the course. |
+| **Reference Materials** | Helpful resources, templates, and guides to revisit after each session. |
 
-1. Browse the repository online.
-2. Download files using **Code → Download ZIP**, or clone the repository if you're comfortable using Git.
-3. Check back regularly as new materials will be added throughout the year.
-
----
-
-## 📂 Repository Structure
-
-```text
-├── data/              Example datasets (when shareable)
-├── exercises/         Workshop activities
-├── figures/           Images and visualizations
-├── scripts/           R scripts and helper functions
-├── slides/            Presentation materials
-└── README.md
-```
-
-*(Folders will continue to evolve as new content is added.)*
+As the pod continues, this repository will grow along with your skills.
 
 ---
 
-## 💡 Our Philosophy
+## New to GitHub?
 
-Reproducible research is more than writing code.
-
-It is about creating work that is transparent, understandable, and reusable—so that future collaborators (and your future self!) can reproduce and build upon your analyses with confidence.
-
-We hope this repository becomes a resource you'll continue to use well beyond ReproRehab.
+You don't need to have prior experience with Git or GitHub to participate successfully. We will work through learning the lingo and the processes together. 
 
 ---
 
-## 🤝 Contributing
+## How to Use This Repository
 
-Participants are encouraged to:
+Throughout the year, you can return here to:
 
-- Ask questions
-- Experiment with the code
-- Adapt examples for their own projects
-- Share improvements and ideas
+- Download code from workshops
+- Review examples from previous sessions
+- Practice with reproducible workflows
+- Find supporting materials shared during the pod
 
-Learning is collaborative, and everyone's experience strengthens the community.
-
----
-
-## 📚 Additional Resources
-
-- 🌐 Course Website
-- 💬 Slack Workspace
-- 📁 Google Drive
-- 📖 Course Syllabus
+There is no expectation that you'll understand everything immediately. Learning reproducible research is a process, and this repository is designed to support that journey.
 
 ---
 
-Happy coding! 🎉
+## Course Resources
+
+Additional course information—including the syllabus, recordings, meeting links, and shared resources—is available on the Pod 1 website.
+https://madelineratoza.github.io/2026Pod1/
+
+---
+
+## Questions?
+
+Questions are always welcome.
+
+If something doesn't make sense or you get stuck, chances are someone else has the same question. Please don't hesitate to ask during meetings or in Slack.
+
+We look forward to learning alongside you throughout the year.
