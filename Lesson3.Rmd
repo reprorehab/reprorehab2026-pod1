@@ -1,0 +1,283 @@
+---
+title: "Lesson 3: Variable Types, Loops, and Conditionals"
+author: "Alexi Reed"
+output: html_document
+---
+
+# Today: Let's Work With Data
+
+## Learning Goals
+
+By the end of this session, learners will be able to:
+
+1.  Identify the different variable types.
+
+2.  Automate repetitive tasks using for loops.
+
+3.  Make decisions in R using if statements to check conditions in their data.
+
+# 1. Quick Review: Importing Data and Performing Simple Calculations
+
+We use the `read.csv()` function to read in a csv file. Make sure rehab_study.csv is saved in the same project/folder you are working in.
+
+```{r}
+setwd('/Users/amreed18/Documents/ReproRehab/TA Materials/RR-TA-Materials-2026-2027/Lesson3')
+rehab_data <- read.csv("rehab_study.csv")
+```
+
+We can perform simple calculations and we can refer to a variable inside our dataset using `$`.
+
+```{r}
+mean(rehab_data$baseline_score)
+```
+
+Read this as: find `baseline_score` inside `rehab_data`, then calculate its mean.
+
+# 2. Variable Types
+
+Our dataset has several different data types, and due to their different formats, R already reads them in differently. We can check to see what R is interpreting them as by using the str function.
+
+We can check the types for all of our variables at once using the `str()` function.
+
+```{r}
+str(rehab_data)
+```
+
+You can also check the type of a specific variable by calling on or referring to it directly.
+
+## Your Turn: Check the variable type for `completed`.
+
+```{r}
+# YOUR CODE HERE
+```
+
+<details>
+
+<summary><strong>If you're stuck, click here for the answer</strong></summary>
+
+```{r}
+str(rehab_data$completed)
+```
+
+</details>
+
+Look at the variable type for **Group**. This is a categorical variable, but R is just reading them in as a string. If we want R to recognize this as a categorical variable, we must change it to a factor using `as.factor()`.
+
+```{r}
+as.factor(rehab_data$group)
+```
+
+Similar functions exist to change variables to other variable types like:
+
+-   `as.character` - Changes to a character (chr, for short)
+
+-   `as.numeric` - Changes to a number (num, for short)
+
+-   `as.integer` - Changer to an integer (int, for short)
+
+# 3. Loops: When We Want To Do Something Over and Over Again
+
+In general, loops tell your program to repeat a task and are a staple in all programming languages. Loops do something as many times as you tell it to.. which is pretty awesome. What's not awesome about loops is the syntax.
+
+There are 3 types of loops: `for`, `while`, and `repeat`. This lesson covers `for` loops.
+
+## For Loops
+
+A `for` loop allows you to repeat an action for every item in a list or vector.
+
+***General Syntax***
+
+> for (value in sequence)
+>
+> { \# execute this code }
+
+### Simple For Loop Example
+
+Let's say we have an object that has all the days of the week stored in called `week`.
+
+```{r}
+week <- c('Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday')
+```
+
+I could write a for loop to print all the days of week from that vector
+
+```{r}
+for (day in week) {
+  print(day)
+}
+```
+
+Here, I'm telling R for the entire vector "week", print the day of the week for each pass.
+
+-   Pass 1: R sets day = Sunday, so it prints "Sunday"
+
+-   Pass 2: R sets day = Monday, so it prints "Monday
+
+-   ...and so on, until it finishes all 7 days!
+
+Note that the variable name `day` is arbitrary - you could call it `for (i in week)` or `for (x in week)`. Naming it `day` simply makes the code readable and self-documenting.
+
+You could also use a `for` loop to do something across all the rows in your data frame.
+
+### For Loop Example #1: A "Hello World!" Remix
+
+```{r}
+for (i in 1:nrow(rehab_data)) {
+  print(paste("Hello", rehab_data$participant_id[i], "from the", rehab_data$group[i], "group!"))
+}
+```
+
+-   Pass 1 (i =1): R looks at row 1 and prints "Hello P0001 from the Intervention group!"
+
+-   Pass 2 (i =2): R looks at row 2 and prints "Hello P0002 from the Treatment group!"
+
+-   And so on until it hits the last row.
+
+### Applied For Loop Example: Calculating Individual Score Improvement
+
+**Goal**: To calculate the change between baseline and follow-up scores for each participant (`followup_score` - `baseline_score`) and add it to our data frame.
+
+First, we need to create a vector to store the results in. We want this vector to have as many slots as our `rehab_data` data frame. We'll call this vector we're creating `score_change`.
+
+```{r}
+score_change <- numeric(nrow(rehab_data))
+```
+
+Look in **Environment**. What do you see?
+
+Then, we will write our for-loop to calculate this change score.
+
+We want our for loop to
+
+-   Iterate row-by-row of our data frame, rehab_data. (what we specify immediately after **for**)
+
+-   To perform `followup_score` - `baseline_score` for (what will go in curly brackets)
+
+-   To perform the operation for each participant
+
+-   And to store each calculation into the empty vector we created called `score_change`, which means we want everything assigned here (**\<-**)
+
+```{r}
+for (i in 1:nrow(rehab_data)) {
+  score_change[i] <- rehab_data$followup_score[i] - rehab_data$baseline_score[i]
+}
+```
+
+Look in **Environment**. What changed in the `score_change` vector?
+
+Now, add `score_change` to your data frame by assigning it to a new variable within `rehab_data`.
+
+```{r}
+rehab_data$score_change <- score_change
+```
+
+# 4. Conditionals: Introducing Logic Into Your Code
+
+Conditionals are a way to introduce logic into your code, with the most common conditional statement sbeing "if" and "if-else".
+
+### If Statement
+
+Think of an `if` statement like a fork in the road. It asks R a simple true/false question. If the answer is **TRUE**, R follows the path inside the curly braces `{ }`. If it's **FALSE**, R ignores that path entirely and moves on.
+
+Let's say we wanted to look at P001's visits and see if they were greater than the visit minimum of 5.
+
+```{r}
+p001_visits <- rehab_data$visits[1] 
+if (p001_visits >= 5) {
+  print("This participant has met the minimum requirement!")
+}
+```
+
+Since their visit number is NOT greater than 5, nothing happened. If we wanted something to print to tell us that, we would use an "If-Else" statement.
+
+### If-Else Statement - Option 1
+
+```{r}
+if (p001_visits >= 5) {
+  print("This participant has met the minimum requirement!")
+} else {
+  print("This participant has NOT met the minimum requirement!")
+}
+```
+
+Here, we've added an `else` argument that specifies what to do if the previous condition is not met.
+
+### If-Else Statement - Option 2 (Vectorized Format)
+
+***General Syntax - Vectorized Format***
+
+-   ifelse(conditional statement, "Printed If True", "Printed If False")
+
+Here's the same example written differently.
+
+```{r}
+ifelse(p001_visits >= 5, "This participant has met the minimum requirement!","This participant has NOT met the minimum requirement!" )
+```
+
+You could also use an if-else statement to categorize participants based on a condition or threshold.
+
+### Your Turn #2: Categorizing Participants Based on Priority Status - Vectorized Format
+
+Let's say a participant with a baseline score below 50 is considered a "High Priority" and above 50 is "Low Priority". We can write an if else statement classify people as such and have it automatically write into the data frame.
+
+**Goal**: Apply the baseline threshold across every row in the dataset and have it automatically write the results into the data frame under variable "priority_status".
+
+Uncomment the line of code by deleting the hashtag and fill in the rest.
+
+```{r}
+# rehab_data$priority_status <-
+```
+
+<details>
+
+<summary><strong>Click here for the Answer</strong></summary>
+
+```{r}
+rehab_data$priority_status <- ifelse(rehab_data$baseline_score < 50, "High Priority", "Low Priority")
+```
+
+</details>
+
+## Optional Challenge: Combining Conditionals and For Loops
+
+Finished early? Give this a try.
+
+Write a for loop that checks every participant in rehab_data. If their visits are greater than or equal to 5, print the following message: "Participant ID completed enough visits!". Otherwise, print "Participant ID needs more visits."
+
+Uncomment the lines of code by removing the hashtags at the beginning of each line and fill in the blanks.
+
+```{r}
+#for (i in 1:_____) {
+ # if (rehab_data$___[i] >= _) {
+ #   print(paste("Participant", rehab_data$participant_id[i], "______"))
+ # } else {
+ #   print(____)
+ # }
+# }
+```
+
+Answer: Which participants did not complete enough visits?
+
+<details>
+
+<summary><strong>If you're stuck, click here for the answer</strong></summary>
+
+```{r}
+for (i in 1:nrow(rehab_data)) {
+  if (rehab_data$visits[i] >= 5) {
+    print(paste("Participant", rehab_data$participant_id[i], "completed enough visits!"))
+  } else {
+    print(paste("Participant", rehab_data$participant_id[i], "needs more visits."))
+  }
+}
+```
+
+Participants 001 and 006 did not complete enough visits.
+
+</details>
