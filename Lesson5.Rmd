@@ -1,0 +1,537 @@
+---
+title: "Pod1Lesson5"
+output: html_document
+---
+
+# Today: Let's Work with Merging and Manipulating Data
+
+Learning Goals
+
+By the end of this session, learners will be able to:
+
+1.  Merge two dataframes together into one dataframe using functions like left_join() and right_join(), then save it as a new CSV.
+2.  Clean and extract information from strings within R.
+3.  Reformat your data into wide and long formats for various use cases later on.
+
+We are going to continue working with the rehab_study.csv, but we are going to try merging it with some demographic data that was stored in a separate CSV file called rehab_study_demo.csv. For the final "Your Turn" at the end, we will also be introducing another fake dataset called lab_results.csv. These 3 CSVs are all available on the GitHub, but if you need them again, you can download them here. Just make sure you save them in the directory you'll be working from!
+
+-   Download rehab_study.csv from [GitHub](https://github.com/reprorehab/reprorehab2026-pod1/blob/main/rehab_study.csv)
+
+-   Download rehab_study_demo.csv from [GitHub](https://github.com/reprorehab/reprorehab2026-pod1/blob/main/rehab_study_demo.csv)
+
+-   Download lab_results.csv from [GitHub](https://github.com/reprorehab/reprorehab2026-pod1/blob/main/lab_results.csv)
+
+## 1. Setting Up Your Workspace
+
+```{r}
+# clear environment
+rm(list = ls())
+# set working directory 
+setwd('/Users/amreed18/Documents/ReproRehab/TA Materials/RR-TA-Materials-2026-2027')
+# read in your data 
+clinical_data <- read.csv('rehab_study.csv',
+                          stringsAsFactors = TRUE)
+demo_data <- read.csv('rehab_study_demo.csv',
+                      stringsAsFactors = TRUE)
+```
+
+For most (if not, all) data manipulation in R, you'll want to use the Tidyverse package. Let's install and load that now. If you've already installed this package in a prior session, you do not need to reinstall it now; you would only have to load the package now since this is a new session.
+
+```{r}
+# uncomment the first line if you need to install this package for the first time
+# install.packages("tidyverse")
+library(tidyverse)
+```
+
+## 2. Getting Familiar With Your Data
+
+```{r}
+head(clinical_data)
+head(demo_data)
+str(demo_data)
+```
+
+To merge across two dataframes, you need to identify the common column across both dataframes. Usually, the common column will be your "Study ID" or equivalent. In clinical_data, we have a column called `participant_id` but in demo_data, the column is called `study_id`. For R to recognize these as the same when we merge, they have to have the same name.
+
+You can rename columns using the rename() function within Tidyverse.
+
+## 3. Rename Function
+
+### *General Syntax*
+
+> rename(dataframe, new_name = old_name)
+
+```{r}
+demo_data <- rename(demo_data,
+       participant_id = study_id)
+colnames(demo_data)
+```
+
+#### Your Turn: Within demo_data, change the variable name for income_usd to income.
+
+```{r}
+# YOUR CODE HERE 
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer
+
+```{r}
+demo_data <- rename(demo_data, 
+       income = income_usd)
+```
+:::
+
+You can also change the way your data is represented. For example, if you wanted to see everyone in order from least income to highest income, you can sort.
+
+To sort just a variable, use sort(). To sort an entire data frame, use order().
+
+## 4. Sorting and Ordering Your Data
+
+### Sort Function
+
+#### General Syntax
+
+> sort(dataframe, new_name = old_name)
+
+### Order Function
+
+#### General Syntax
+
+> order(dataframe, new_name = old_name)
+
+## 5. Merging Datasets Using 3 Different Functions
+
+You can merge two dataframes together in R using a variety of functions.
+
+-   right_join()
+
+-   left_join()
+
+-   merge()
+
+### left_join()
+
+Left_join essentially tells R "Take everything from the left table, and bring in matching information from the right table when you find a match". If there's no match in the right table, the new columns get filled with NA (missing values). That's why it's called a left_join - it keeps ALL rows from the left-hand dataset.
+
+Syntax: left_join(x,y, by = "column name")
+
+```{r}
+leftjoin_data <- left_join(clinical_data, 
+                           demo_data,
+                           by = "participant_id")
+```
+
+### Your Turn: right_join()
+
+right_join essentially tells R "Take everything from the right table, and bring in matching information from the left table when you find a match". If there's no match in the right table, the new columns get filled with NA (missing values). That's why it's called a right_join - it keeps ALL rows from the right-hand dataset.
+
+Syntax: right_join(x, y, by = "column_name")
+
+Give it a try below by calling this newly merged dataset rightjoin_data.
+
+```{r}
+# YOUR CODE HERE
+```
+
+::: {.callout-tip collapse="true"}
+### Click here for the Answer
+
+```{r}
+rightjoin_data <- right_join(demo_data, clinical_data, 
+                             by = "participant_id")
+```
+:::
+
+### merge()
+
+You're probably wondering "What's the point of merge() if we already covered left_join() / right_join?". Well, merge() is actually included in base R. So, if you don't have tidyverse loaded in your session for some reason, you can use merge.
+
+Syntax: merge(x, y, by = "column_name", all.x = TRUE/FALSE, all.y = TRUE/FALSE)
+
+Where
+
+-   x: dataframe 1
+
+-   y: dataframe 2
+
+-   all.x = If set to TRUE, keep all things from dataframe 1
+
+-   all.y = If set to TRUE, keep all things from dataframe 2
+
+Other key differences
+
+1.  How join types are "selected": As you can see above, you can still do a left or right join using the merge function, you just specify it in either of the all.x or all.y arguments.
+2.  Row Reordering: Unlike left_join or right_join, merge() automatically sorts the output dataset by the "by" column. So, for example, if you're joining by `participant_id`, the newly merged dataset will be ordered by the `participant_id`.
+
+#### Example: merge()
+
+```{r}
+merged_data <- merge(clinical_data, demo_data,
+                     by = "participant_id")
+```
+
+Since `participant_id` is already in order, no reordering happened.. but its something to keep in mind.
+
+## 6. Reshaping Data - An Important Step for Future Data Visualization
+
+Data visualizations are one of the most powerful things R can do. Sometimes, in order to create visualizations we want, we have to reshape how our data looks so R can read it correctly to make said visualizations.
+
+You will either be going from wide format to long format ***or*** long format to wide format.
+
+For example, let's look at `rehab_study.csv`. `baseline_score` and `followup_score` live in two separate columns - this is wide format, and if we wanted to create something like a boxplot comparing across timepoints, we wouldn't be able to do it in wide format. Our data would have to be in long format.
+
+Why?
+
+In ggplot2, the most commonly used R visualization package, aesthetics for your graph require a single categorical column for time point and a single numeric column for the value. Because baseline and follow up scores are spread across two columns, ggplot2 can't easily plot them together.
+
+To reshape your data from wide to long, you can use `pivot_longer()`. `pivot_longer()` collapses multiple columns into key-value pairs.
+
+### Example: pivot_longer()
+
+Let's pivot our data longer so that baseline and follow up are all under one categorical column called "timepoint"
+
+```{r}
+clinical_data_long <- clinical_data %>%
+  pivot_longer(
+    cols = c(baseline_score, followup_score), #Columns to collapse
+    names_to = "timepoint",         #Name for the column I want those columns collapsed to
+    values_to = "score"             # Where I want those respective values to go 
+  )
+```
+
+Let's see what our new dataframe looks like.
+
+```{r}
+head(clinical_data_long)
+```
+
+Now, what if we wanted to calculate a score change from baseline and follow up? We would want our data in wide format. To transition back to wide format, we'll use `pivot_wider()`.
+
+### Example: pivot_wider()
+
+```{r}
+clinical_data_wide <- clinical_data_long %>%
+  pivot_wider(
+    names_from = timepoint, # values from this column will supply the new column names
+    values_from = score, # values from this column will be the new "values" 
+  )
+```
+
+Now, this should look like what we had at the beginning: a column for `baseline_score` and a column for `followup_score`.
+
+```{r}
+head(clinical_data_wide)
+```
+
+### Your Turn: Calculate `score_change`, where its the difference between follow up scores and baseline scores.
+
+```{r}
+# YOUR CODE HERE
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer
+
+```{r}
+clinical_data_wide <- clinical_data_wide %>%
+  mutate(score_change = followup_score - baseline_score)
+```
+:::
+
+Now, let's save the long version of our data frame as a csv for our tutorial next week since we'll be doing some data visualization then.
+
+```{r}
+write.csv(clinical_data_wide, 'rehab_study_wide.csv')
+```
+
+# 7. Handling Strings in R
+
+In our dataset, we have a gender variable. Luckily, whoever did data entry was consistent with how they entered in "Non-Binary", "Male", and "Female" as they're all consistently spelled the same way.
+
+```{r}
+merged_data$gender
+```
+
+Having everything consistent like that makes it easy for us to manipulate the variable. For example, if we wanted to recode the variable, we could do that as follows:
+
+```{r}
+merged_data <- merged_data %>%
+  mutate(gender = recode(
+    gender,
+    "Male" = "M", "Female" = "F", "Non-Binary" = "NB"))
+merged_data$gender
+```
+
+This, however, assumes that we ***know all the patterns that we're looking for*** and that there are not many of them. Sometimes, it's not that simple. What if our gender variable looked like this?
+
+```{r}
+set.seed(4) # random sample below - make sure same every time
+gender <- sample(c("Male", "mAle", "MaLe", "M", "MALE", "Ma", "FeMAle", "F", "Woman", "Man", "Fm", "FEMALE"), 1000, replace = TRUE)
+table(gender)
+```
+
+Notice how "Male", "mALe", "MaLe", "M", and "MALE" all represent the exact same thing but R sees them as 5 distinct groups.
+
+To handle messy text like this, we can use two essential functions from the `stringr` package (which is part of tidyverse): str_detect() and str_extract().
+
+## Pattern Detection with str_detect()
+
+`str_detect()` asks a simple TRUE/FALSE question: "Does this text column contain a specific pattern?"
+
+Because it returns TRUE or FALSE, it works wonderfully inside `filter()` to keep specific rows, or inside `mutate()` to create binary flag column.
+
+### str_detect() Syntax
+
+> str_detect(string_column, "pattern")
+
+### Example: Filtering for Degrees with str_detect()
+
+Let's filter our demo_data to find participants who hold any type of degree.
+
+```{r}
+degree_holders <- demo_data %>%
+  filter(str_detect(education_level, "Degree"))
+head(degree_holders)
+```
+
+### Your Turn: Filter `clinical_data` for participants in the Intervention group using str_detect().
+
+```{r}
+# YOUR CODE HERE  
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer
+
+```{r}
+intervention_patients <- clinical_data %>%
+  filter(str_detect(group, "Intervention"))
+```
+:::
+
+### Pattern Extraction with str_extract()
+
+While `str_detect()` tells us *if* a pattern exists, `str_extract()` **pulls out the matching text** and puts it into a brand new column. If the pattern is not found, R fills in `NA`.
+
+Syntax: `str_extract(string_column, "pattern")`
+
+#### Example: Extracting state names or text snippets
+
+Let's create a new column called `state_ma` that extracts `"MA"` from `site_location`
+
+```{r}
+demo_ma <- demo_data %>%
+  mutate(state_ma = str_extract(site_location, "MA"))
+head(demo_ma)
+```
+
+### Cleaning Currency and Numbers with str_remove() and as.numeric()
+
+All other examples were basically just filtering data examples, but cleaning up text strings is where most of these stringr packages come in handy. For example, numeric variables often come attached to symbols like \$ or "," (like our income columns).
+
+Because R views "\$60,000" as text/a string, we can't calculate a mean or median until we clean it up. We can use `str_remove()` to strip unwanted symbols.
+
+```{r}
+demo_clean <- demo_data %>% 
+  mutate(
+    income_clean = str_remove(income, "\\$"), # Remove the dollar sign
+    income_clean = str_remove(income_clean, ","), # remove comma
+    income_clean = as.numeric(income_clean) # treat as a number
+  )
+head(demo_clean)
+```
+
+Now, we can calculate the mean.
+
+```{r}
+mean(demo_clean$income_clean, na.rm = TRUE)
+```
+
+# Your Turn: Let's put everything into practice.
+
+We have another csv file that contains some additional health information on our participants, such as cholesterol, blood pressure, and BMI called `lab_results`. All of the following exercises will leverage this dataset along with the other two datasets we used earlier. We're going to start from scratch, though so first, we need to clear your environment.
+
+```{r}
+rm(list = ls())
+```
+
+Some of these steps we did earlier, but try to do them without checking your previous code first.
+
+## 1. Read in 3 CSVs: rehab_study.csv, rehab_study_demo.csv, and lab_results.csv.
+
+```{r}
+# Uncomment the lines below and get started.
+# clinical_data <- rehab_study.csv here
+# demo_data <- rehab_study_demo.csv here
+# lab_data <- lab_results.csv here
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer
+
+```{r}
+clinical_data <- read.csv('rehab_study.csv')
+demo_data <- read.csv('rehab_study_demo.csv', stringsAsFactors = TRUE)
+lab_data <- read.csv('lab_results.csv', stringsAsFactors = TRUE)
+```
+:::
+
+## 2. Merge rehab_study.csv with rehab_study_demo.csv using left_join() and save as `study_full`. Please note that you may need to rename columns to accomplish this task.
+
+```{r}
+# YOUR CODE HERE
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer
+
+```{r}
+demo_data <- rename(demo_data, participant_id = study_id)
+
+study_full <- left_join(clinical_data, demo_data, by = "participant_id")
+head(study_full)
+```
+:::
+
+## 3. Get familiar with your newest dataset, lab_results, by using head(). Check the structure of your dataset using str().
+
+```{r}
+# YOUR CODE HERE
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer
+
+```{r}
+head(lab_data)
+str(lab_data)
+```
+:::
+
+## 4. Merge lab_data into study_full using left_join() by participant_id. Save as `complete_study`.
+
+```{r}
+#YOUR CODE HERE
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer
+
+```{r}
+complete_study <- left_join(study_full, lab_data, by = "participant_id")
+head(complete_study)
+```
+:::
+
+## 5. In `complete_study`, clean the `cholesterol_level` column by removing "mg/dL" and converting it to numeric as `cholesterol_clean`. Also create a `score_improvement` column. Accomplish this all using mutate() and assign it to a new dataframe called `complete_clean`.
+
+```{r}
+# YOUR CODE HERE
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer
+
+```{r}
+complete_clean <- complete_study %>%
+  mutate(
+    cholesterol_clean = str_remove(cholesterol_level, " mg/dL"),
+    cholesterol_clean = as.numeric(cholesterol_clean),
+    score_improvement = followup_score - baseline_score
+  )
+
+head(complete_clean)
+```
+:::
+
+## 6. Filter `complete_clean` for participants who completed the study, group by `group`, and calculate the following using the summarize() function:
+
+-   Average baseline score (`avg_baseline`)
+
+-   Average follow up score (`avg_followup`)
+
+-   Average score improvement (`avg_improvement`)
+
+-   Average cholesterol level (`avg_cholesterol`)
+
+```{r}
+# YOUR CODE HERE 
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer
+
+```{r}
+group_summary <- complete_clean %>%
+  filter(completed == "Yes") %>% 
+  group_by(group) %>%
+  summarize(
+    avg_baseline    = mean(baseline_score),
+    avg_followup    = mean(followup_score),
+    avg_improvement = mean(score_improvement),
+    avg_cholesterol = mean(cholesterol_clean, na.rm = TRUE)
+  )
+```
+:::
+
+## 7. Now, let's reshape your data to compare different health metrics.
+
+So far, we've looked at scores over time$$cite: 1, 3$$. But what if we want to create side-by-side plots comparing **two completely different measures**, like a participant's total clinic `visits` and their `bmi`?
+
+Because `visits` lives in one column and `bmi` lives in another, `ggplot2` wouldn't be able to plot them side-by-side on the same chart layout$$cite: 1, 3$$. We need to reshape the dataset so that the metric names (`"visits"` vs `"bmi"`) sit in one categorical column, and their numeric measurements sit in another$$cite: 1, 3$$!
+
+**Your Goal:**
+
+1.  Take `complete_clean` and use `select()` to pull `participant_id`, `group`, `visits`, and `bmi.` Save as `health_wide`.
+2.  Use `pivot_longer()` on `health_wide`
+    1.  `cols = c(visits, bmi)` $\rightarrow$ The two health metric columns to collapse
+    2.  `names_to = "metric_type"` $\rightarrow$ The new column name holding the labels `"visits"` and `"bmi"`
+    3.  `values_to = "measurement"` $\rightarrow$ The new column name holding the numeric values
+3.  Save the final long dataset as `health_metrics_long`.
+
+```{r}
+# Step 1: Select your relevant health metric columns. 
+
+# Step 2: Pivot from wide format to long format. Uncomment the line of code below to get started.
+# health_metrics_long <- 
+# Check your results. Uncomment the line of code below to get started.
+# head()
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer.
+
+```{r}
+# Step 1: Select relevant health metric columns.
+health_wide <- complete_clean %>%
+  select(participant_id, group, visits, bmi)
+
+# Step 2: Pivot from wide format to long format.
+health_metrics_long <- health_wide %>%
+  pivot_longer(
+    cols = c(visits, bmi),
+    names_to = "metric_type",
+    values_to = "measurement"
+  )
+
+# Inspect the result.
+head(health_metrics_long)
+```
+:::
+
+## 8. Save your work.
+
+We will also use this new long format dataset next week for data visualization. Write it to a csv and name it health_metrics_long.
+
+```{r}
+# YOUR CODE HERE  
+```
+
+::: {.callout-tip collapse="true"}
+## If you're stuck, click here for the answer.
+
+```{r}
+write.csv(health_metrics_long, 'health_metrics_wide.csv')
+```
+:::
